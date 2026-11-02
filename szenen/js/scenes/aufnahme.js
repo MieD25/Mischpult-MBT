@@ -2,6 +2,7 @@
 Sim.registerScene({
   id: 'aufnahme',
   name: 'Aufnahme',
+  checkOn: ['sa'],
   intro: 'Dialogaufnahme in der Sprecherkabine: zwei Großmembran-Mikrofone, eine Stereo-Atmo als Zuspielung, Kopfhörer für die Sprecher. Aufgenommen wird auf einen Stereo-Recorder, kontrolliert wird über Hinterband.',
   room: {
     w: 6, h: 4.5, rt: 0.35, level: 0.12, label: 'Sprecherkabine, ca. 6 × 4,5 m, Nachhallzeit ≈ 0,35 s',

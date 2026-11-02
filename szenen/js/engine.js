@@ -82,7 +82,7 @@
       g.auxBus[a] = gain(1, true); g.auxFader[a] = gain(1, true); g.anAux[a] = an();
       g.auxBus[a].connect(g.auxFader[a]); g.auxFader[a].connect(g.anAux[a]); g.bus['aux' + (a + 1)] = g.auxFader[a];
     }
-    g.pflBus = gain(1, true);
+    g.pflBus = gain(1, true); g.pflAn = an(); g.pflBus.connect(g.pflAn);
 
     /* Kanalzüge */
     for (let i = 0; i < st.ch.length; i++) {
@@ -95,6 +95,7 @@
       n.pfl = gain(0); n.mute = gain(1); n.fader = gain(1); n.postAn = an(); n.pan = ctx.createStereoPanner();
       n.send = [[gain(0), gain(0)], [gain(0), gain(0)]]; // [aux][pre, post]
       n.inGain.connect(n.inAn); n.inGain.connect(n.clip); n.clip.connect(n.hpf).connect(n.lo).connect(n.mid).connect(n.hi);
+      n.preAn = an(); n.hi.connect(n.preAn);
       n.hi.connect(n.pfl).connect(g.pflBus);
       n.hi.connect(n.mute).connect(n.fader).connect(n.pan).connect(g.mainBus);
       n.fader.connect(n.postAn);
@@ -125,6 +126,7 @@
 
     /* Abhöre */
     g.lsL = gain(1, true); g.lsR = gain(1, true); const mg = ctx.createChannelMerger(2);
+    g.lsAnL = an(); g.lsAnR = an(); g.lsL.connect(g.lsAnL); g.lsR.connect(g.lsAnR);
     g.lsL.connect(mg, 0, 0); g.lsR.connect(mg, 0, 1);
     g.lsVol = gain(1); g.final = gain(1); mg.connect(g.lsVol).connect(g.final).connect(ctx.destination);
     g.lsConn = [];

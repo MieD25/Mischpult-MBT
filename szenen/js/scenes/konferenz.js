@@ -3,6 +3,7 @@
 Sim.registerScene({
   id: 'konferenz',
   name: 'Konferenz',
+  checkOn: ['r1'],
   intro: 'Podiumsveranstaltung in einem Saal: Moderation am Rednerpult, zwei Gäste am Podiumstisch, ein Trailer vom Laptop. Ausgegeben wird auf die Saal-PA und einen Livestream.',
   room: {
     w: 12, h: 8, rt: 1.3, level: 0.25, label: 'Saal, ca. 12 × 8 m, Nachhallzeit ≈ 1,3 s',
@@ -11,7 +12,7 @@ Sim.registerScene({
       { t: 'rect', x: 5.2, y: 1.5, w: 3.8, h: 0.55, label: 'Podiumstisch' },
       { t: 'zone', x: 1.5, y: 3.6, w: 9, h: 3.4, label: 'Publikum' },
       { t: 'rect', x: 5.0, y: 7.25, w: 2, h: 0.5, label: 'Regie' },
-      { t: 'pa', x: 0.7, y: 3.0, a: 20 }, { t: 'pa', x: 11.3, y: 3.0, a: 160 },
+      { t: 'pa', x: 0.7, y: 3.0, a: 40 }, { t: 'pa', x: 11.3, y: 3.0, a: 140 },
     ],
   },
   sources: [
@@ -86,7 +87,7 @@ Sim.registerScene({
       ok: api => api.angleErr('m2', 'r2') <= 30 },
     { id: 'clip', t: 'Einspieler in Stereo', d: 'Laptop L und R liegen auf Line 1 und Line 2. Beide Kanäle 7 und 8 sind aber auf Line 1 gepatcht. Patche Kanal 8 auf Line 2 und panne Kanal 7 ganz links, Kanal 8 ganz rechts.',
       ok: api => api.chansForInputs(['l1']).some(i => api.st.ch[i].pan <= -0.8) && api.chansForInputs(['l2']).some(i => api.st.ch[i].pan >= 0.8) },
-    { id: 'lvl', t: 'Redner einpegeln', d: 'Lass jeden Redner sprechen (Knöpfe unter dem Raumplan) und stelle das <b>Gain</b> so ein, dass die Spitzen zwischen −18 und −6 dBFS liegen.',
+    { id: 'lvl', t: 'Redner einpegeln', d: 'Lass jeden Redner einzeln sprechen (Knöpfe unter dem Raumplan), drücke <b>PFL</b> am Kanal und stelle das <b>Gain</b> so ein, dass die Spitzen auf der Abhöranzeige zwischen −18 und −6 dBFS liegen.',
       ok: api => ['r1', 'r2', 'r3'].every(id => api.levelOk(id)) },
     { id: 'hpf', t: 'Low Cut für Sprache', d: 'Schalte an allen drei Rednerkanälen den <b>HPF</b> ein, etwa zwischen 80 und 150 Hz. Das nimmt Trittschall und Rumpeln heraus.',
       ok: api => ['r1', 'r2', 'r3'].every(id => api.chansForSource(id).some(i => api.st.ch[i].hpfOn && api.st.ch[i].hpf >= 70 && api.st.ch[i].hpf <= 160)) },

@@ -109,6 +109,16 @@
     c.append(all);
   }
 
+  const dbTxt = d => d === -Infinity || d < -40 ? '< −40' : S.fmtDb(d, 1);
+  function pickupTable(mc, m, target) {
+    const lv = id => { const s = scene.sources.find(x => x.id === id), g = S.micGeom(st, mc.id, id), pg = Math.abs(S.patternGain(m.pattern, g.err * Math.PI / 180));
+      return { s, g, pat: S.ampToDb(pg), tot: S.ampToDb((s.level || 1) * pg * 0.3 / Math.max(0.03, g.dist)) }; };
+    const ref = lv(target.id).tot, Q = S.PATTERNS[m.pattern].Q;
+    const rows = scene.sources.filter(s => s.kind === 'acoustic').map(s => { const v = lv(s.id);
+      return `<tr${s.id === target.id ? ' class="tgt"' : ''}><td><span class="dot" style="background:${s.color}"></span>${s.name}</td><td>${S.fmtM(v.g.dist)}</td><td>${Math.round(v.g.err)}°</td><td>${dbTxt(v.pat)} dB</td><td>${s.id === target.id ? 'Bezug' : dbTxt(v.tot - ref) + ' dB'}</td></tr>`; }).join('');
+    return `<table class="pickup" data-help="pickup"><thead><tr><th>Quelle</th><th>Abstand</th><th>Winkel</th><th>Richtwirkung</th><th>Direktschall ggü. ${target.short}</th></tr></thead><tbody>${rows}</tbody></table>
+      <p class="pnote" data-help="pickup">Raumanteil (Diffusschall) gegenüber einer Kugel: ${S.fmtDb(-10 * Math.log10(Q))} dB</p>`;
+  }
   function renderMicPanel() {
     const p = $('#micpanel'); const id = st.selMic;
     if (!id) { p.innerHTML = '<p class="muted">Wähle im Raumplan ein Mikrofon aus, um Typ, Richtcharakteristik und Kabel einzustellen.</p>'; return; }
@@ -127,7 +137,8 @@
         <label data-help="socket">Kabel an<select id="mpSock"${dis}><option value="">nicht verbunden</option>${socks}</select></label>
       </div>
       <div class="mpinfo"><span data-help="mic">Abstand zu ${target.name}: <b>${fmtM(geo.dist)}</b>, ${Math.round(geo.err)}° neben der Achse</span>
-      <span data-help="phantom">Phantomspeisung: ${ph}</span>${prox > 1 ? `<span data-help="proximity">Nahbesprechung: ca. +${Math.round(prox)} dB Bass</span>` : ''}</div>`;
+      <span data-help="phantom">Phantomspeisung: ${ph}</span>${prox > 1 ? `<span data-help="proximity">Nahbesprechung: ca. +${Math.round(prox)} dB Bass</span>` : ''}</div>
+      ${pickupTable(mc, m, target)}`;
     if (!dis) {
       $('#mpType').addEventListener('change', e => { m.type = e.target.value; changed('mic'); });
       $('#mpPat').addEventListener('change', e => { m.pattern = e.target.value; changed('mic'); });

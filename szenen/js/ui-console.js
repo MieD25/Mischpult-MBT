@@ -19,7 +19,7 @@
       S.toggle(s, { label: '48 V', cls: 'ph', get: g('phantom'), set: v => { c.phantom = v; changed('ch'); }, help: 'phantom' });
       let r = el('div', 'krow'); s.append(r);
       S.knob(r, { label: 'GAIN', p: S.P.gain, get: g('gain'), set: sv('gain'), help: 'gain', aria: `Kanal ${i + 1} Gain` });
-      const lb = el('div', 'ledbox'); lb.dataset.help = 'led'; const led = el('div', 'led'); const lr = el('div', 'ledread', '—'); lb.append(el('div', 'ledlab', 'PEAK'), led, lr); r.append(lb);
+      const lb = el('div', 'ledbox'); lb.dataset.help = 'led'; const led = el('div', 'led'); const lr = el('div', 'ledread', '—'); lb.append(el('div', 'ledlab', 'PEAK'), led, lr, el('div', 'ledunit', 'dBFS')); r.append(lb);
       r = el('div', 'krow'); s.append(r);
       S.toggle(r, { label: 'HPF', cls: 'hpfb', get: g('hpfOn'), set: sv('hpfOn'), help: 'hpf' });
       S.knob(r, { label: 'FREQ', p: S.P.hpf, get: g('hpf'), set: sv('hpf'), help: 'hpf', aria: `Kanal ${i + 1} Low-Cut-Frequenz` });
@@ -82,7 +82,7 @@
       s.append(el('div', 'spacer'));
       const cr = el('div', 'cliprow'); cr.dataset.help = 'rec'; const led = el('div', 'led'); cr.append(el('div', 'ledlab', 'CLIP'), led); s.append(cr);
       const wrap = el('div', 'fwrap'); const ms = el('div', 'meters'); ms.dataset.help = 'rec';
-      const mL = el('canvas', 'meter'), mR = el('canvas', 'meter'); ms.append(mL, mR); wrap.append(ms); s.append(wrap, el('div', 'fread', 'IN L/R'));
+      const mL = el('canvas', 'meter'), mR = el('canvas', 'meter'); ms.append(mL, mR); wrap.append(ms, S.meterScale()); s.append(wrap, el('div', 'fread', 'IN L/R'));
       ui.rec = { clip: led, mL, mR, time }; con.append(s);
     }
     {
@@ -98,6 +98,10 @@
       s.append(box);
       const pf = el('div', 'pflind', 'PFL aktiv'); pf.dataset.help = 'pfl'; s.append(pf); ui.pflInd = pf;
       s.append(el('div', 'spacer'));
+      const ml = el('div', 'lsmlabel', 'ABHÖRE'); ml.dataset.help = 'pflmeter'; s.append(ml); ui.lsLabel = ml;
+      const wrap = el('div', 'fwrap'); const ms = el('div', 'meters'); ms.dataset.help = 'pflmeter';
+      const mL = el('canvas', 'meter'), mR = el('canvas', 'meter'); ms.append(mL, mR); wrap.append(ms, S.meterScale(true)); s.append(wrap);
+      ui.ls = { mL, mR };
       const r = el('div', 'krow one'); s.append(r);
       S.knob(r, { label: 'VOL', p: S.P.vol, get: () => st.vol, set: v => { st.vol = v; changed('m'); }, help: 'vol', aria: 'Abhörlautstärke' });
       con.append(s);
@@ -114,5 +118,7 @@
     const anyPfl = st.ch.some(c => c.pfl);
     ui.listenBtns.forEach(([id, b]) => { b.classList.toggle('on', st.listen === id); b.classList.toggle('dim', anyPfl); b.setAttribute('aria-pressed', st.listen === id); });
     ui.pflInd.classList.toggle('on', anyPfl);
+    const pfls = st.ch.map((c, i) => c.pfl ? 'K' + (i + 1) : null).filter(Boolean);
+    ui.lsLabel.textContent = anyPfl ? 'PFL ' + pfls.join('+') : 'ABHÖRE'; ui.lsLabel.classList.toggle('on', anyPfl);
   };
 })(Sim);

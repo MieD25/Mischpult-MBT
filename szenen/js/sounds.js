@@ -33,19 +33,20 @@
     const buzz = oc.createGain(); buzz.gain.value = 0.04; vEnv.connect(buzz).connect(out);
     const nb = noiseBuf(oc, rnd);
     const fric = oc.createBufferSource(); fric.buffer = nb; fric.loop = true;
-    const fHP = oc.createBiquadFilter(); fHP.type = 'highpass'; fHP.frequency.value = 3800;
-    const fEnv = oc.createGain(); fEnv.gain.value = 0; fric.connect(fHP).connect(fEnv).connect(out);
+    const fHP = oc.createBiquadFilter(); fHP.type = 'bandpass'; fHP.Q.value = 1.4; fHP.frequency.value = 4500;
+    const fLP = oc.createBiquadFilter(); fLP.type = 'lowpass'; fLP.frequency.value = 7000;
+    const fEnv = oc.createGain(); fEnv.gain.value = 0; fric.connect(fHP).connect(fLP).connect(fEnv).connect(out);
     let t = 0.3; src.frequency.setValueAtTime(f0, 0);
     while (t < len - 1.2) {
       const n = 3 + Math.floor(rnd() * 8); const start = t;
       for (let s = 0; s < n && t < len - 0.9; s++) {
         const progress = s / n, dur = (0.13 + rnd() * 0.13) / (o.rate || 1);
         const kind = rnd();
-        if (kind < 0.25) { // Zischlaut
-          const fd = 0.05 + rnd() * 0.06; fHP.frequency.setValueAtTime(rnd() < 0.5 ? 4200 : 2600, t);
-          fEnv.gain.setTargetAtTime(0.35 + rnd() * 0.2, t, 0.01); fEnv.gain.setTargetAtTime(0, t + fd, 0.012); t += fd;
-        } else if (kind < 0.45) { // Plosiv
-          nsrc(oc, nb, t, 0.03, 'bandpass', 1200 + rnd() * 1500, 0.8, 0.5, 0.012, out); t += 0.025;
+        if (kind < 0.1) { // Zischlaut (s, sch, f): selten, leise, weich ein- und ausgeblendet
+          const fd = 0.04 + rnd() * 0.04; fHP.frequency.setValueAtTime(rnd() < 0.5 ? 5000 : 3000, t);
+          fEnv.gain.setTargetAtTime(0.05 + rnd() * 0.04, t, 0.015); fEnv.gain.setTargetAtTime(0, t + fd, 0.015); t += fd;
+        } else if (kind < 0.28) { // Plosiv (p, t, k)
+          nsrc(oc, nb, t, 0.03, 'bandpass', 900 + rnd() * 900, 0.8, 0.12, 0.01, out); t += 0.02;
         }
         const v = V[vk[Math.floor(rnd() * vk.length)]];
         const pitch = f0 * (1.15 - 0.3 * progress) * (1 + (rnd() - 0.5) * 0.14) * (s === 0 ? 1.06 : 1);

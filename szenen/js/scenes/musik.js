@@ -12,7 +12,8 @@ Sim.registerScene({
       { t: 'rect', x: 6.9, y: 2.1, w: 1.3, h: 0.55, label: 'Keyboard (DI)' },
       { t: 'rect', x: 4.85, y: 4.0, w: 0.7, h: 0.3, label: 'Wedge' },
       { t: 'zone', x: 1, y: 5.0, w: 8, h: 1.8, label: 'Publikum' },
-      { t: 'pa', x: 0.5, y: 4.5, a: 30 }, { t: 'pa', x: 9.5, y: 4.5, a: 150 },
+      { t: 'rect', x: 4.3, y: 6.25, w: 1.4, h: 0.45, label: 'Regie' },
+      { t: 'pa', x: 0.5, y: 4.5, a: 24 }, { t: 'pa', x: 9.5, y: 4.5, a: 156 },
     ],
   },
   sources: [
@@ -83,7 +84,7 @@ Sim.registerScene({
       ok: api => api.st.out.mon === 'aux1' && api.chansForSource('sing').some(i => api.st.ch[i].aux[0] > -20) },
     { id: 'pfl', t: 'Abhören mit PFL', d: 'Hör dir die Kick allein an: <b>PFL</b> am Kick-Kanal drücken. PFL schaltet nur die Abhöre um, das Publikum hört weiter den ganzen Mix.',
       ok: api => api.chansForSource('kick').some(i => api.st.ch[i].pfl) && api.st.ch.filter(c => c.pfl).length === 1 },
-    { id: 'lvl', t: 'Mikrofone einpegeln', d: 'Bring Kick, Snare und Gesang mit dem Gain auf Spitzen zwischen −18 und −6 dBFS.',
+    { id: 'lvl', t: 'Mikrofone einpegeln', d: 'Bring Kick, Snare und Gesang mit dem Gain auf Spitzen zwischen −18 und −6 dBFS. Ablesen per <b>PFL</b> auf der Abhöranzeige.',
       ok: api => ['kick', 'snare', 'sing'].every(id => api.levelOk(id)) },
   ],
 });

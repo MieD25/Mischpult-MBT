@@ -80,7 +80,7 @@
     const th = el('div', 'thumb'); f.append(th);
     const ms = el('div', 'meters'); ms.dataset.help = 'meter';
     const cans = []; for (let i = 0; i < meters; i++) { const c = el('canvas', 'meter'); ms.append(c); cans.push(c); }
-    wrap.append(sc, f, ms);
+    wrap.append(sc, f, ms, S.meterScale());
     const rd = el('div', 'fread'); rd.dataset.help = help;
     const upd = () => { const d = get(); th.style.top = ((1 - dbToPos(d)) * (FH - TH)) + 'px'; rd.textContent = fmtDb(d) + ' dB'; f.setAttribute('aria-valuetext', fmtDb(d) + ' dB'); };
     const setP = p => { let d = posToDb(clamp(p, 0, 1)); if (d !== -Infinity) d = Math.round(d * 2) / 2; if (Math.abs(d) < 0.6) d = 0; set(d); upd(); };
@@ -102,6 +102,15 @@
     return cans;
   };
 
+  /* dBFS-Skala für Pegelanzeigen (gleiche Abbildung wie drawMeter: −60 … +6 dBFS) */
+  S.meterScale = (target) => {
+    const sc = el('div', 'mscale' + (target ? ' target' : '')); sc.dataset.help = 'meter'; sc.setAttribute('aria-hidden', 'true');
+    for (const [d, l] of [[0, '0'], [-6, '−6'], [-12, '−12'], [-18, '−18'], [-30, '−30'], [-60, '−60']]) {
+      const s = el('span', d === -6 || d === -18 ? 'tg' : null, l); s.style.top = (FH * (1 - (d + 60) / 66)) + 'px'; sc.append(s);
+    }
+    const u = el('span', 'unit', 'dBFS'); u.style.top = (FH + 9) + 'px'; sc.append(u);
+    return sc;
+  };
   /* Pegelanzeige: Zustand mit Rücklauf und Peak-Hold */
   const MS = {};
   S.resetMeters = () => { for (const k in MS) delete MS[k]; };
@@ -109,7 +118,7 @@
     const m = MS[k] || (MS[k] = { v: -Infinity, hold: -Infinity, ht: 0 });
     m.v = Math.max(db, m.v - 22 * dt); if (db >= m.hold || now > m.ht) { m.hold = db; m.ht = now + 1500; } return m;
   };
-  S.drawMeter = (cv, m) => {
+  S.drawMeter = (cv, m, target) => {
     const d = window.devicePixelRatio || 1; if (cv.width !== 8 * d) { cv.width = 8 * d; cv.height = FH * d; }
     const c = cv.getContext('2d'); c.setTransform(d, 0, 0, d, 0, 0); const W = 8, H = FH;
     const y = db => H * (1 - (clamp(db, -60, 6) + 60) / 66);
@@ -120,6 +129,7 @@
     }
     c.globalAlpha = 1; c.fillStyle = '#0b0c0e'; for (let yy = 0; yy < H; yy += 3) c.fillRect(0, yy, W, 1);
     c.fillStyle = 'rgba(255,255,255,.55)'; c.fillRect(0, Math.round(y(0)), W, 1);
+    if (target) { c.fillStyle = 'rgba(240,176,58,.9)'; c.fillRect(0, Math.round(y(-6)), 2, Math.round(y(-18) - y(-6))); }
     if (m.hold > -60) { c.fillStyle = '#fff'; c.fillRect(0, Math.round(y(m.hold)), W, 2); }
   };
   const tbuf = new Float32Array(1024);
